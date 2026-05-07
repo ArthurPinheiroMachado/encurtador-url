@@ -10,6 +10,8 @@ export DB_USER=postgres
 export HTTP_PORT=6060
 export HTTP_BASE="/api/"
 export TIMEOUT_TIME=3 #Segundos
+export USER=user
+export PASS=pass123
 
 go run cmd/server/main.go
  # go build -ldflags "-s -w" cmd/server/main.go

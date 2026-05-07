@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"golang/db"
+	"golang/internal/middlewares"
 	"golang/internal/url"
 	"golang/internal/util"
 	"net/http"
@@ -21,6 +22,13 @@ func main() {
 func run() error {
 	trace := util.CreateErrorContext("run")
 
+	user, userErr := util.EnvAsResult("USER")
+	pass, passErr := util.EnvAsResult("PASS")
+
+	if err := trace.Join(userErr, passErr); err != nil {
+		return trace.Apply(err)
+	}
+
 	db, dbErr := db.ConstructDatabase()
 	if dbErr != nil {
 		return trace.Apply(dbErr)
@@ -35,10 +43,10 @@ func run() error {
 		return trace.Apply(urlCacheErr)
 	}
 
-	return webServer(db, UrlCache)
+	return webServer(user, pass, db, UrlCache)
 }
 
-func webServer(db *db.Database, urlCache *url.UrlCache) error {
+func webServer(user, pass string, db *db.Database, urlCache *url.UrlCache) error {
 	trace := util.CreateErrorContext("webServer")
 
 	base, baseErr := util.EnvAsResult("HTTP_BASE")
@@ -52,11 +60,11 @@ func webServer(db *db.Database, urlCache *url.UrlCache) error {
 	router := mux.NewRouter().UseEncodedPath()
 	sub := router.PathPrefix(base).Subrouter()
 
-	sub.HandleFunc("/urls", url.GetUrls(urlCache)).Methods("GET")
-	sub.HandleFunc("/urls", url.CreateUrl(urlCache, db)).Methods("POST")
-	sub.HandleFunc("/urls/{id}", url.GetUrl(urlCache)).Methods("GET")
-	sub.HandleFunc("/{id}", url.GetOriginalUrl(urlCache, db)).Methods("GET")
-	sub.HandleFunc("/{id}", url.DeleteUrl(urlCache, db)).Methods("DELETE")
+	sub.HandleFunc("/urls", middlewares.Auth(user, pass, url.GetUrls(urlCache))).Methods("GET")
+	sub.HandleFunc("/urls", middlewares.Auth(user, pass, url.CreateUrl(urlCache, db))).Methods("POST")
+	sub.HandleFunc("/urls/{id}", middlewares.Auth(user, pass, url.GetUrl(urlCache))).Methods("GET")
+	sub.HandleFunc("/{id}", middlewares.Auth(user, pass, url.GetOriginalUrl(urlCache, db))).Methods("GET")
+	sub.HandleFunc("/{id}", middlewares.Auth(user, pass, url.DeleteUrl(urlCache, db))).Methods("DELETE")
 
 	fmt.Println("Starting ENCURTADOR at port", port)
 
