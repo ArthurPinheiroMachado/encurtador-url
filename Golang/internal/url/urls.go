@@ -128,7 +128,7 @@ func GetUrl(urls *UrlCache) func(http.ResponseWriter, *http.Request) {
 
 		urls.Rw.RLock()
 		if info, exists := urls.Url[id]; !exists {
-			util.SendHttpError(w, 400, trace.Apply(fmt.Errorf("")))
+			util.SendHttpError(w, 400, trace.Apply(fmt.Errorf("URL not found")))
 			return
 		} else {
 			if err := json.NewEncoder(w).Encode(info); err != nil {
@@ -149,7 +149,7 @@ func DeleteUrl(urls *UrlCache, db *db.Database) func(http.ResponseWriter, *http.
 
 		urls.Rw.RLock()
 		if _, exists := urls.Url[id]; !exists {
-			util.SendHttpError(w, 400, trace.Apply(fmt.Errorf("")))
+			util.SendHttpError(w, 400, trace.Apply(fmt.Errorf("URL not found")))
 			return
 		}
 		urls.Rw.RUnlock()

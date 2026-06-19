@@ -1,0 +1,29 @@
+ENV["DB_HOST"] ||= "0.0.0.0"
+ENV["DB_PORT"] ||= "5432"
+ENV["DB_NAME"] ||= "encurtador"
+ENV["DB_USER"] ||= "postgres"
+ENV["DB_PASS"] ||= "postgres"
+ENV["HTTP_PORT"] ||= "6060"
+ENV["HTTP_BASE"] ||= "/api/"
+ENV["USER"] ||= "user"
+ENV["PASS"] ||= "pass123"
+
+development:
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  host: <%= ENV["DB_HOST"] %>
+  port: <%= ENV["DB_PORT"] %>
+  database: <%= ENV["DB_NAME"] %>
+  username: <%= ENV["DB_USER"] %>
+  password: <%= ENV["DB_PASS"] %>
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  host: <%= ENV["DB_HOST"] %>
+  port: <%= ENV["DB_PORT"] %>
+  database: <%= ENV["DB_NAME"] %>
+  username: <%= ENV["DB_USER"] %>
+  password: <%= ENV["DB_PASS"] %>
